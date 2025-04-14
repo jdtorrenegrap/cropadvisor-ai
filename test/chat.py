@@ -22,8 +22,10 @@ while True:
 
     try:
         
-        response = chat_service.chat(test_token, user_message)
-        print(f"IA-> Chatbot: {response}\n")
+        print("IA-> Chatbot: ", end="", flush=True)
+        for chunk in chat_service.chat(test_token, user_message):
+            print(chunk, end="", flush=True)
+        print("\n")  
     except Exception as e:
         print(f"Error: {e}")
         break

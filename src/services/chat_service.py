@@ -2,6 +2,7 @@ import os
 import cv2
 import base64
 import numpy as np
+from datetime import datetime
 from langchain_deepseek import ChatDeepSeek
 from langchain_core.prompts import ChatPromptTemplate
 from dotenv import load_dotenv
@@ -11,6 +12,7 @@ from src.middleware.data_token import TokenUsers
 from src.services.detected_service import ModelDetection
 
 load_dotenv()
+
 class ChatService:
 
     def __init__(self):
@@ -21,10 +23,8 @@ class ChatService:
 
         self.model = ChatDeepSeek(
             model_name="deepseek-chat",
-            temperature=0,
-            max_tokens=None,
-            timeout=None,
-            max_retries=2,
+            temperature=0.7,
+            streaming=True,
             api_key=os.getenv("llm")
         )
 
@@ -34,11 +34,11 @@ class ChatService:
                 """Eres Senda, un asistente agrícola experto en monitoreo de cultivos. Estás conectado al sistema CROP (Crop Resource Optimization Platform).
 
                 Ayuda a los agricultores con información clara y útil sobre sus cultivos, basándote en:
-                - Lecturas de sensores: {reads}  
-                - Alertas configuradas: {alerts}  
-                - Alertas activadas: {alerts_activated}  
-                - Historial de conversación: {chat_history}  
-
+                - Lecturas de sensores: {reads} {datetime_now}
+                - Alertas configuradas: {alerts} {datetime_now}
+                - Alertas activadas: {alerts_activated} {datetime_now}
+                - Historial de conversación: {chat_history}  {datetime_now}
+                
                 - Explica de manera simple y clara lo que indican las lecturas.  
                 - Si hay alertas activadas, menciónalas y explica qué acción se recomienda.  
                 - Si no hay alertas, ofrece recomendaciones de monitoreo o prevención.  
@@ -65,6 +65,7 @@ class ChatService:
             reads = self.queries_service.get_reads(token)
             alerts = self.queries_service.get_alerts(token)
             alerts_activated = self.queries_service.get_alerts_activated(token)
+            datetime_now = datetime.today().strftime("%Y-%m-%d")
 
             if isinstance(message, dict) and message.get("type") == "image":
                 image_b64 = message["base64"]
@@ -92,7 +93,8 @@ class ChatService:
                     "question": message,
                     "reads": reads,
                     "alerts": alerts,
-                    "alerts_activated": alerts_activated
+                    "alerts_activated": alerts_activated,
+                    "datetime_now": datetime_now
                 }
 
                 prompt = self.prompt_template.format_prompt(**input_data)
@@ -117,22 +119,26 @@ class ChatService:
                     "question": message,
                     "reads": reads,
                     "alerts": alerts,
-                    "alerts_activated": alerts_activated
+                    "alerts_activated": alerts_activated,
+                    "datetime_now": datetime_now
                 }
 
                 prompt = self.prompt_template.format_prompt(**input_data)
-                response = self.model.invoke(prompt)
 
-                response_text = (
-                    response.get("content") if isinstance(response, dict)
-                    else getattr(response, "content", "No se pudo generar una respuesta.")
-                )
+               
+                full_response = ""
 
-                cleaned_message = (message.get("message") if isinstance(message, dict) else message)
-                self.memory.save_message(user_id, cleaned_message, response_text)
+                
+                for chunk in self.model.stream(prompt):
+                    content = chunk.content if hasattr(chunk, "content") else str(chunk)
+                    full_response += content  
+                    yield content  
+
+                
+                self.memory.save_message(user_id, message, full_response)
 
                 return {
-                    "message": response_text,
+                    "message": full_response,
                     "image": None
                 }
 

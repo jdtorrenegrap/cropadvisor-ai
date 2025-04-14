@@ -1,5 +1,5 @@
 python-dotenv
-fastapi[all]
+fastapi[standard]
 langchain
 langchain-ollama
 langchain-community

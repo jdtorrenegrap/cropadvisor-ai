@@ -4,7 +4,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 from src.services.memory_service import MemoryService
 
 memory_service = MemoryService()
-user_id = 3
+user_id = 1
 
 try:
     chat_history = memory_service.get_chat_history(user_id)

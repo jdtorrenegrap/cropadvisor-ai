@@ -11,15 +11,18 @@ class QueriesService:
     def get_reads(self, token):
         username = self.data_token.extract_user_info(token)[1]
         headers = {"Authorization": f"Bearer {token}"}
-
+    
         response = requests.get(f"{self.settings.GET_READS}{username}", headers=headers)
-
+    
         if response.status_code == 200:
             data = response.json()
             if data:
-                formatted_data = "**Lecturas de sensores:**\n"
-                for i in data:
-                    formatted_data += f"Sensor:{i.get('device_id', 'N/A')}\n"
+                # Ordenar las lecturas por fecha (descendente) y tomar las últimas 10
+                sorted_data = sorted(data, key=lambda x: x.get('created_at', ''), reverse=True)[:10]
+    
+                formatted_data = "**Últimas 10 lecturas de sensores:**\n"
+                for i in sorted_data:
+                    formatted_data += f"Sensor: {i.get('device_id', 'N/A')}\n"
                     formatted_data += f"Unidad de medida: {i.get('unit_id', 'N/A')}, Valor: {i.get('value', 'N/A')}\n"
                     formatted_data += f"Fecha: {i.get('created_at', 'N/A')}\n"
                 return formatted_data.strip()

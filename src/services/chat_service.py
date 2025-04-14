@@ -36,9 +36,8 @@ class ChatService:
                 Ayuda a los agricultores con información clara y útil sobre sus cultivos, basándote en:
                 - Lecturas de sensores: {reads} {datetime_now}
                 - Alertas configuradas: {alerts} {datetime_now}
-                - Alertas activadas: {alerts_activated} {datetime_now}
                 - Historial de conversación: {chat_history}  {datetime_now}
-                
+            
                 - Explica de manera simple y clara lo que indican las lecturas.  
                 - Si hay alertas activadas, menciónalas y explica qué acción se recomienda.  
                 - Si no hay alertas, ofrece recomendaciones de monitoreo o prevención.  
@@ -64,7 +63,7 @@ class ChatService:
 
             reads = self.queries_service.get_reads(token)
             alerts = self.queries_service.get_alerts(token)
-            alerts_activated = self.queries_service.get_alerts_activated(token)
+            #alerts_activated = self.queries_service.get_alerts_activated(token)
             datetime_now = datetime.today().strftime("%Y-%m-%d")
 
             if isinstance(message, dict) and message.get("type") == "image":
@@ -93,7 +92,7 @@ class ChatService:
                     "question": message,
                     "reads": reads,
                     "alerts": alerts,
-                    "alerts_activated": alerts_activated,
+                   #"alerts_activated": alerts_activated,
                     "datetime_now": datetime_now
                 }
 
@@ -122,7 +121,7 @@ class ChatService:
                     "question": message,
                     "reads": reads,
                     "alerts": alerts,
-                    "alerts_activated": alerts_activated,
+                    #"alerts_activated": alerts_activated,
                     "datetime_now": datetime_now
                 }
 

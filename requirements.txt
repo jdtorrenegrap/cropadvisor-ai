@@ -1,0 +1,9 @@
+python-dotenv
+fastapi[all]
+langchain
+langchain-ollama
+langchain-community
+langchain-deepseek
+ultralytics
+redis
+PyJWT

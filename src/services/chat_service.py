@@ -98,18 +98,21 @@ class ChatService:
                 }
 
                 prompt = self.prompt_template.format_prompt(**input_data)
-                response = self.model.invoke(prompt)
+                full_response = ""
 
-                response_text = (
-                    response.get("content") if isinstance(response, dict)
-                    else getattr(response, "content", "No se pudo generar una respuesta.")
-                )
+                
+                for chunk in self.model.stream(prompt):
+                    content = chunk.content if hasattr(chunk, "content") else str(chunk)
+                    full_response += content  
+                    yield content  
+
+                self.memory.save_message(user_id, message, full_response)
 
                 cleaned_message = (message.get("message") if isinstance(message, dict) else message)
-                self.memory.save_message(user_id, cleaned_message, response_text)
+                self.memory.save_message(user_id, cleaned_message, full_response)
 
                 return {
-                    "message": response_text,
+                    "message": full_response,
                     "image": f"data:image/jpeg;base64,{img_encoded}"
                 }
 

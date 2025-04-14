@@ -11,7 +11,6 @@ chat = ChatService()
 async def chat_message(message: ChatMessage, token: str = Depends(TokenUsers.validate_token)):
     try:
         generator = chat.chat(token, message.dict())
-        full_response = "".join([chunk for chunk in generator])
-        return {"message": full_response}
+        return StreamingResponse(generator, media_type="text/plain")  
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

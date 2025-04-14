@@ -1,13 +1,10 @@
-import sys
 import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
+import requests
 from dotenv import load_dotenv
-from src.services.chat_service import ChatService
 
 load_dotenv()
 
-chat_service = ChatService()
-
+api_url = "http://127.0.0.1:8000/cropadvisor/chat"  # URL del endpoint de la API
 test_token = os.getenv("TEST_TOKEN")
 
 print("IA-> Bienvenido al chatbot de monitoreo de cultivos.")
@@ -21,11 +18,19 @@ while True:
         break
 
     try:
-        
-        print("IA-> Chatbot: ", end="", flush=True)
-        for chunk in chat_service.chat(test_token, user_message):
-            print(chunk, end="", flush=True)
-        print("\n")  
+        # Enviar la solicitud POST a la API
+        headers = {"Authorization": f"Bearer {test_token}"}
+        payload = {"message": user_message}
+        response = requests.post(api_url, json=payload, headers=headers, stream=True)
+
+        # Verificar si la respuesta es exitosa
+        if response.status_code == 200:
+            print("IA-> Chatbot: ", end="", flush=True)
+            for chunk in response.iter_content(chunk_size=1024):
+                print(chunk.decode("utf-8"), end="", flush=True)
+            print("\n")
+        else:
+            print(f"Error: {response.status_code} - {response.text}")
     except Exception as e:
         print(f"Error: {e}")
         break

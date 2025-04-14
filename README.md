@@ -1,56 +1,14 @@
 # CropAdvisor
 
-CropAdvisor es una API diseñada para proporcionar recomendaciones inteligentes para el seguimiento de cultivos. Se basa en un modelo de inteligencia artificial **Gemma:3** ejecutado localmente con **Ollama** y gestionado con **LangChain**. Se integra con el sistema Crops (Crop Resource Optimization Platform).
+CropAdvisor es un asistente de chat inteligente diseñado para apoyar a agricultores y técnicos en el monitoreo de cultivos. Integra modelos de IA conversacional y un módulo de visión por computadora con YOLO para el reconocimiento de posibles enfermedades en las plantas. Todo está orquestado mediante LangChain, y utiliza Redis Cloud para gestionar el historial de conversaciones.
 
-> [!IMPORTANT]
-> Antes de ejecutar la API de CropAdvisor, asegúrate de tener instalados los siguientes componentes:
->
-> 1. **Docker**: Para ejecutar Redis localmente.
-> 2. **Python 3.10 o superior**: Para el backend de la API.
-> 3. **Ollama**: Para ejecutar el modelo de inteligencia artificial localmente.
-
----
+Se conecta con la plataforma CROPS (Crop Resource Optimization Platform) para complementar la toma de decisiones agronómicas con datos relevantes y análisis automatizado.
 
 ## Clona este repositorio
 
 ```bash
-git clone https://github.com/jdtorrenegrap/cropadvisor.git
+git clone https://github.com/jdtorrenegrap/cropadvisor-ai.git
 ```
-
-## Configuración de Redis con Docker
-
-Redis es un servicio de base de datos en memoria que se utiliza para almacenar el historial de chat y otros datos temporales. Sigue estos pasos para configurarlo:
-
-1. **Descargar la imagen oficial de Redis**:
-   ```bash
-   docker pull redis
-   ```
-2. **Crea y ejecuta un contenedor de Redis**:
-   ```bash
-   docker run -d --name redisCropAdvisor -p 6379:6379 redis
-   ```
-3. **Verifica que Redis esté en ejecución**:
-   ```bash
-   docker ps
-   ```
-   Deberías ver un contenedor llamado redisCropAdvisor en la lista de contenedores en ejecución.
-
-## Intalación de Ollama
-
-Ollama es necesario para ejecutar el modelo de inteligencia artificial localmente. Sigue las instrucciones según tu sistema operativo:
-
-1. **Para Linux**:
-   ```bash
-   curl -fsSL https://ollama.com/install.sh | sh
-   ```
-2. **Para Windows:**
-   Descarga e instala Ollama desde el sitio oficial.
-
-3. **Ejecuta el modelo de IA:**
-   Una vez instalado Ollama, descarga y ejecuta el modelo Gemma:3:
-   ```bash
-   ollama run gemma3:4b
-   ```
 
 ## Configuración del entorno Python
 

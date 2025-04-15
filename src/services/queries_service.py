@@ -17,7 +17,7 @@ class QueriesService:
         if response.status_code == 200:
             data = response.json()
             if data:
-                # Ordenar las lecturas por fecha (descendente) y tomar las últimas 10
+
                 sorted_data = sorted(data, key=lambda x: x.get('created_at', ''), reverse=True)[:10]
     
                 formatted_data = "**Últimas 10 lecturas de sensores:**\n"
@@ -56,22 +56,23 @@ class QueriesService:
     def get_alerts_activated(self, token):
         user_id = self.data_token.extract_user_info(token)[0]
         headers = {"Authorization": f"Bearer {token}"}
-
+    
         response = requests.get(f"{self.settings.GET_ALERTS_ACTIVATED}{user_id}", headers=headers)
-
+    
         if response.status_code == 200:
-            data = response.json()
-            if data: 
-                formatted_data = "**Alertas activadas:**\n"
-                for i in data:
-                    formatted_data += f"Umbral de Temperatura: {i.get('temperature', 'N/A')}\n"
-                    formatted_data += f"Umbral de Humedad del aire: {i.get('air_humidity', 'N/A')}\n"
-                    formatted_data += f"Umbral de Humedad del suelo: {i.get('soil_humidity', 'N/A')}\n"
-                    formatted_data += f"Numero de alertas activadas: {i.get('alert_config_id', 'N/A')}\n"
-                    formatted_data += f"Fecha: {i.get('alert_active_at', 'N/A')}\n"
-                
-                return formatted_data.strip()
-            else:
-                return "No se encontraron alertas activadas."
-        else:
-            return f"Error al obtener alertas. Código: {response.status_code}, Detalle: {response.text}"
+            try:
+                data = response.json()
+                if isinstance(data, list):  
+                    formatted_data = "**Alertas activadas:**\n"
+                    for i in data:
+                        formatted_data += f"Umbral de Temperatura: {i.get('temperature', 'N/A')}\n"
+                        formatted_data += f"Umbral de Humedad del aire: {i.get('air_humidity', 'N/A')}\n"
+                        formatted_data += f"Umbral de Humedad del suelo: {i.get('soil_humidity', 'N/A')}\n"
+                        formatted_data += f"Numero de alertas activadas: {i.get('alert_config_id', 'N/A')}\n"
+                        formatted_data += f"Fecha: {i.get('alert_active_at', 'N/A')}\n"
+                    return formatted_data.strip()
+                else:
+                    return "No se encontraron alertas activadas."
+            except Exception as e:
+                return f"Error al procesar la respuesta JSON: {str(e)}"
+       

@@ -34,9 +34,11 @@ class ChatService:
                 """Eres Senda, un asistente agrícola experto en monitoreo de cultivos. Estás conectado al sistema CROP (Crop Resource Optimization Platform).
 
                 Ayuda a los agricultores con información clara y útil sobre sus cultivos, basándote en:
-                - Lecturas de sensores: {reads} {datetime_now}
-                - Alertas configuradas: {alerts} {datetime_now}
-                - Historial de conversación: {chat_history}  {datetime_now}
+                - Lecturas de sensores: {reads} 
+                - Alertas configuradas: {alerts} 
+                - Historial de conversación: {chat_history} 
+                - Fecha actual: {datetime_now}
+                - Enfermedades detectadas: {imge}
             
                 - Explica de manera simple y clara lo que indican las lecturas.  
                 - Si hay alertas activadas, menciónalas y explica qué acción se recomienda.  
@@ -63,19 +65,17 @@ class ChatService:
 
             reads = self.queries_service.get_reads(token)
             alerts = self.queries_service.get_alerts(token)
-            #alerts_activated = self.queries_service.get_alerts_activated(token)
+            alerts_activated = self.queries_service.get_alerts_activated(token)
             datetime_now = datetime.today().strftime("%Y-%m-%d")
+            detections_summary = None 
 
             if isinstance(message, dict) and message.get("type") == "image":
                 image_b64 = message["base64"]
                 image_bytes = base64.b64decode(image_b64)
                 nparr = np.frombuffer(image_bytes, np.uint8)
                 img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-
+                
                 detections = self.model_detection.detect(img)
-
-                img_with_boxes = self.model_detection.draw_boxes(img.copy(), detections[0])
-                img_encoded = self.model_detection.encode_image(img_with_boxes)
 
                 detections_summary = (
                     "\n".join(
@@ -85,64 +85,30 @@ class ChatService:
                     if detections[0] else "No se detectaron enfermedades visibles."
                 )
 
-                message = f"Se detectaron: {detections_summary}. ¿Qué recomendaciones puedes dar?"
+            input_data = {
+                "chat_history": chat_history,
+                "question": message,
+                "imge": detections_summary if detections_summary else "No se proporcionó imagen.",
+                "reads": reads,
+                "alerts": alerts,
+                "alerts_activated": alerts_activated,
+                "datetime_now": datetime_now
+            }
 
-                input_data = {
-                    "chat_history": chat_history,
-                    "question": message,
-                    "reads": reads,
-                    "alerts": alerts,
-                   #"alerts_activated": alerts_activated,
-                    "datetime_now": datetime_now
-                }
+            prompt = self.prompt_template.format_prompt(**input_data)
+            full_response = ""
 
-                prompt = self.prompt_template.format_prompt(**input_data)
-                full_response = ""
+            for chunk in self.model.stream(prompt):
+                content = chunk.content if hasattr(chunk, "content") else str(chunk)
+                full_response += content
+                yield content
 
-                
-                for chunk in self.model.stream(prompt):
-                    content = chunk.content if hasattr(chunk, "content") else str(chunk)
-                    full_response += content  
-                    yield content  
+            self.memory.save_message(user_id, message, full_response)
 
-                self.memory.save_message(user_id, message, full_response)
-
-                cleaned_message = (message.get("message") if isinstance(message, dict) else message)
-                self.memory.save_message(user_id, cleaned_message, full_response)
-
-                return {
-                    "message": full_response,
-                    "image": f"data:image/jpeg;base64,{img_encoded}"
-                }
-
-            else:
-                input_data = {
-                    "chat_history": chat_history,
-                    "question": message,
-                    "reads": reads,
-                    "alerts": alerts,
-                    #"alerts_activated": alerts_activated,
-                    "datetime_now": datetime_now
-                }
-
-                prompt = self.prompt_template.format_prompt(**input_data)
-
-               
-                full_response = ""
-
-                
-                for chunk in self.model.stream(prompt):
-                    content = chunk.content if hasattr(chunk, "content") else str(chunk)
-                    full_response += content  
-                    yield content  
-
-                
-                self.memory.save_message(user_id, message, full_response)
-
-                return {
-                    "message": full_response,
-                    "image": None
-                }
+            return {
+                "message": full_response,
+                "image": None
+            }
 
         except Exception as e:
             return {"message": f"Lo siento, ocurrió un error: {str(e)}", "image": None}

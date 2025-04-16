@@ -110,8 +110,9 @@ class ChatService:
 
             if not full_response.strip():
                 full_response = "Lo siento, no tengo información para responder a tu pregunta."
-          
-            self.memory.save_message(user_id, message, full_response)
+            
+            cleaned_message = (message.get("message") if isinstance(message, dict) else message)
+            self.memory.save_message(user_id, cleaned_message, full_response)
 
             return {
                 "message": full_response,

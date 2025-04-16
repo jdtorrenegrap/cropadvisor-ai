@@ -38,7 +38,6 @@ class ChatService:
                 - Alertas configuradas: {alerts} 
                 - Historial de conversación: {chat_history} 
                 - Fecha actual: {datetime_now}
-                - Enfermedades detectadas: {imge}
             
                 - Explica de manera simple y clara lo que indican las lecturas.  
                 - Si hay alertas activadas, menciónalas y explica qué acción se recomienda.  
@@ -71,6 +70,9 @@ class ChatService:
 
             if isinstance(message, dict) and message.get("type") == "image":
                 image_b64 = message["base64"]
+                if not image_b64 == message.get("base64"):
+                    raise ValueError("No se proporcionó una imagen válida.")
+                
                 image_bytes = base64.b64decode(image_b64)
                 nparr = np.frombuffer(image_bytes, np.uint8)
                 img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
@@ -85,9 +87,12 @@ class ChatService:
                     if detections[0] else "No se detectaron enfermedades visibles."
                 )
 
+                if not message.get("message"):
+                    message["message"] = f"Se detectaron: {detections_summary}. ¿Qué recomendaciones puedes dar?"
+
             input_data = {
                 "chat_history": chat_history,
-                "question": message,
+                "question": message.get("message", "") if isinstance(message, dict) else message,
                 "imge": detections_summary if detections_summary else "No se proporcionó imagen.",
                 "reads": reads,
                 "alerts": alerts,
@@ -103,6 +108,9 @@ class ChatService:
                 full_response += content
                 yield content
 
+            if not full_response.strip():
+                full_response = "Lo siento, no tengo información para responder a tu pregunta."
+          
             self.memory.save_message(user_id, message, full_response)
 
             return {

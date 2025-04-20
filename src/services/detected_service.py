@@ -5,7 +5,7 @@ import random
 from ultralytics import YOLO
 class ModelDetection:
 
-    def __init__(self, model_path='best.pt'):
+    def __init__(self, model_path=''):
         self.model = YOLO(model_path)
         self.colors = [tuple([random.randint(0, 255) for _ in range(3)]) for _ in range(100)]
 

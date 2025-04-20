@@ -20,6 +20,7 @@ class ChatService:
         self.data_token = TokenUsers()
         self.queries_service = QueriesService()
         self.model_detection = ModelDetection(model_path='src/models/best.pt')
+        self.model_detection_plant = ModelDetection(model_path='src/models/best_plants.pt')
 
         self.model = ChatDeepSeek(
             model_name="deepseek-chat",
@@ -31,30 +32,28 @@ class ChatService:
         self.prompt_template = ChatPromptTemplate.from_messages([
             (
                 "system",
-                """Eres Senda, un asistente agrícola experto en monitoreo de cultivos. Estás conectado al sistema CROP (Crop Resource Optimization Platform).
+                """You are Senda, an agricultural assistant expert in crop monitoring. You are connected to the CROP (Crop Resource Optimization Platform) system.
 
-                Ayuda a los agricultores con información clara y útil sobre sus cultivos, basándote en:
-                - Lecturas de sensores: {reads} 
-                - Alertas configuradas: {alerts} 
-                - Historial de conversación: {chat_history} 
-                - Fecha actual: {datetime_now}
-            
-                - Explica de manera simple y clara lo que indican las lecturas.  
-                - Si hay alertas activadas, menciónalas y explica qué acción se recomienda.  
-                - Si no hay alertas, ofrece recomendaciones de monitoreo o prevención.  
-                - Usa ejemplos o comparaciones prácticas cuando sea útil.  
+                You help farmers with clear and useful information about their crops, based on:
+                - Sensor readings: {reads} 
+                - Configured alerts: {alerts} 
+                - Chat history: {chat_history} 
+                - Current date: {datetime_now}
 
-                - Ten en cuenta el rango de error de los sensores.  
-                - No inventes información si algún dato falta.  
+                - Explain simply and clearly what the readings indicate.    
+                - If alerts are enabled, mention them and explain what action is recommended.    
+                - If there are no alerts, offer recommendations for monitoring or prevention.  
+
+                - Take into account the error range of the sensors.   
+                - Don't make up information if any data is missing.  
  
-                Responde con un tono amigable y relajado, como un buen compañero de campo.  
-                Solo responde preguntas agrícolas. Si la pregunta no es relevante, responde de forma educada sin desviarte del tema.  
-                Si dices "Hola" al inicio no es necesario que lo repitas en cada respuesta.
+                 Respond like a good field partner.    
+                 Only answer agricultural questions. If the question is not relevant, answer politely and stay on topic.  
+                 Say "Hello" at the beginning, and don't repeat it in every answer.
 
-                ¡Vamos a ayudar a nuestros agricultores!
                 """
             ),
-            ("human", "**Pregunta:** {question}")
+            ("human", "**Question:** {question}")
         ])
 
     def chat(self, token, message):
@@ -77,8 +76,20 @@ class ChatService:
                 nparr = np.frombuffer(image_bytes, np.uint8)
                 img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
                 
-                detections = self.model_detection.detect(img)
+                plant_detections = self.model_detection_plant.detect(img)
+                print("Debug: ", plant_detections)
+                validate_detections = ['plants']
+                threshold = 0.15
 
+                plant_detections = any(
+                    d['class_name'] in validate_detections and d['confidence'] >= threshold
+                    for d in plant_detections[0]
+                )
+                if not plant_detections:
+                    yield "No se detectaron plantas en la imagen."
+                    return {"message": "No se detectaron plantas en la imagen.", "image": None}
+                
+                detections = self.model_detection.detect(img)
                 detections_summary = (
                     "\n".join(
                         f"{d['class_name']} ({d['confidence']*100:.1f}%)"

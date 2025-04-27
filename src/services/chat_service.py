@@ -49,8 +49,7 @@ class ChatService:
  
                  Respond like a good field partner.    
                  Only answer agricultural questions. If the question is not relevant, answer politely and stay on topic.  
-                 Say "Hello" at the beginning, and don't repeat it in every answer.
-
+                
                 """
             ),
             ("human", "**Question:** {question}")
@@ -68,8 +67,8 @@ class ChatService:
             detections_summary = None 
 
             if isinstance(message, dict) and message.get("type") == "image":
-                image_b64 = message["base64"]
-                if not image_b64 == message.get("base64"):
+                image_b64 = message.get("base64")
+                if not image_b64:
                     raise ValueError("No se proporcionó una imagen válida.")
                 
                 image_bytes = base64.b64decode(image_b64)
@@ -77,7 +76,7 @@ class ChatService:
                 img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
                 
                 plant_detections = self.model_detection_plant.detect(img)
-                print("Debug: ", plant_detections)
+                print("Debug plant_detections:", plant_detections)
                 validate_detections = ['plants']
                 threshold = 0.15
 
@@ -98,9 +97,12 @@ class ChatService:
                     if detections[0] else "No se detectaron enfermedades visibles."
                 )
 
-                if not message.get("message"):
-                    message["message"] = f"Se detectaron: {detections_summary}. ¿Qué recomendaciones puedes dar?"
+                message["message"] = f"{detections_summary}. {message.get('message')}"
 
+                # Dentro de chat_service.py, en el bloque de procesamiento de imagen:
+                if not message.get("message"):
+                   message["message"] = f"Se detectaron: {detections_summary}. ¿Qué recomendaciones puedes dar?"
+            
             input_data = {
                 "chat_history": chat_history,
                 "question": message.get("message", "") if isinstance(message, dict) else message,

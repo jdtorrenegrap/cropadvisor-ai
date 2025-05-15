@@ -3,7 +3,7 @@ fastapi[standard]
 langchain
 langchain-ollama
 langchain-community
-langchain-deepseek
+langchain-google-genai
 ultralytics
 redis
 PyJWT

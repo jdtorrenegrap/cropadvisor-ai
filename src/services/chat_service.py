@@ -80,10 +80,10 @@ class ChatService:
                     if detections[0] else "No se detectaron enfermedades visibles."
                 )
 
-                message["message"] = f"{detections_summary}. {message.get('message')}"
+                message["message"] = f"Se detecto: {detections_summary}. {message.get('message')}"
 
                 if not message.get("message"):
-                   message["message"] = f"Se detectaron: {detections_summary}. ¿Qué recomendaciones puedes dar?"
+                   message["message"] = f"En la imagen se detecto {detections_summary}. ¿Qué recomendaciones puedes dar?"
             
             input_data = {
                 "chat_history": chat_history,

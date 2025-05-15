@@ -3,14 +3,17 @@ import numpy as np
 import base64
 import random
 from ultralytics import YOLO
-class ModelDetection:
+from src.services.multiton import MultitonMeta
 
+class ModelDetection(metaclass=MultitonMeta):
+
+    
     def __init__(self, model_path=''):
+        self.model_path = model_path
         self.model = YOLO(model_path)
         self.colors = [tuple([random.randint(0, 255) for _ in range(3)]) for _ in range(100)]
 
     def detect(self, image: np.ndarray):
-
         img_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         results = self.model([img_rgb], imgsz=640, conf=0.1)
         return self.results_to_json(results)

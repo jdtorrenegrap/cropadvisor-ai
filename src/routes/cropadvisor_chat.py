@@ -1,4 +1,4 @@
-from fastapi import Depends, APIRouter, HTTPException
+from fastapi import Depends, APIRouter, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.responses import StreamingResponse
 from src.services.chat_service import ChatService
 from src.models.chat_message import ChatMessage

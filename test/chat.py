@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-api_url = "https://cropadvisor.onrender.com/cropadvisor/chat" 
+api_url = "http://127.0.0.1:8000/cropadvisor/chat" 
 test_token = os.getenv("TEST_TOKEN")
 
 print("IA-> Bienvenido al chatbot de monitoreo de cultivos.")

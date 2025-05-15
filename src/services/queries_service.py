@@ -75,4 +75,3 @@ class QueriesService:
                     return "No se encontraron alertas activadas."
             except Exception as e:
                 return f"Error al procesar la respuesta JSON: {str(e)}"
-       

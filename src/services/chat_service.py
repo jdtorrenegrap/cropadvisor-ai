@@ -3,9 +3,7 @@ import cv2
 import base64
 import numpy as np
 from datetime import datetime
-from langchain_deepseek import ChatDeepSeek
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_core.prompts import ChatPromptTemplate
 from dotenv import load_dotenv
 from src.services.promt_service import PromptService
 from src.services.proxy import ModelDetectionProxy

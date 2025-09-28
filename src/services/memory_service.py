@@ -4,7 +4,7 @@ from src.core.config import Settings
 
 class MemoryService:
     def __init__(self):
-        self.redis_url = f"redis://{Settings.REDIS_USER}:{Settings.REDIS_PASSWORD}@{Settings.REDIS_HOST}:{int(Settings.REDIS_PORT)}"
+        self.redis_url = Settings.REDIS_URL
         self.memory = {}
 
     def get_user_memory(self, user_id: str):

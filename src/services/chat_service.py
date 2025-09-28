@@ -69,7 +69,7 @@ class ChatService:
                 )
                 if not plant_detections:
                     yield "No se detectaron plantas en la imagen."
-                    return {"message": "No se detectaron plantas en la imagen.", "image": None}
+                    return
                 
                 detections = self.model_detection.detect(img)
                 detections_summary = (
@@ -107,4 +107,4 @@ class ChatService:
             self.memory.save_message(user_id, cleaned_message, full_response)
 
         except Exception as e:
-            yield{"message": f"Lo siento, ocurrió un error: {str(e)}", "image": None}
+            yield f"Lo siento, ocurrió un error: {str(e)}"

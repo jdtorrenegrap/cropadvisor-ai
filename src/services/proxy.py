@@ -22,9 +22,8 @@ class ModelDetectionProxy:
         self.cache[image_hash] = detections
 
         # Limitar el tamaño de la caché
-        if len(self.cache) > self.cache_size:  
+        if len(self.cache) > self.cache_size:
             # eliminamos el elemento más antiguo
-            removed_item = self.cache.popitem(last=False)
-            print(f"Proxy: entrada eliminada de la caché: {removed_item}")
+            self.cache.popitem(last=False)
 
         return detections

@@ -10,6 +10,7 @@ class Settings:
     GET_ALERTS_ACTIVATED = os.getenv('endpoint_alert_activated')
     
     #Redis
+    REDIS_URL = os.getenv('REDIS_URL')
     REDIS_HOST = os.getenv('host')
     REDIS_PORT = os.getenv('redis_port')
     REDIS_DECODE = os.getenv('decode_responses')

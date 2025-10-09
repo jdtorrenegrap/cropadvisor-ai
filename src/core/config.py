@@ -5,14 +5,14 @@ load_dotenv()
 
 class Settings:
 
-    GET_READS = os.getenv('endpoint_get_read')
-    GET_ALERTS = os.getenv('endpoint_alert_config')
-    GET_ALERTS_ACTIVATED = os.getenv('endpoint_alert_activated')
-    
+    GET_READS = os.getenv('ENDPOINT_GET_READ')
+    GET_ALERTS = os.getenv('ENDPOINT_ALERT_CONFIG')
+    GET_ALERTS_ACTIVATED = os.getenv('ENDPOINT_ALERT_ACTIVATED')
+
     #Redis
     REDIS_URL = os.getenv('REDIS_URL')
-    REDIS_HOST = os.getenv('host')
-    REDIS_PORT = os.getenv('redis_port')
-    REDIS_DECODE = os.getenv('decode_responses')
-    REDIS_USER = os.getenv('username')
-    REDIS_PASSWORD = os.getenv('password')
+    REDIS_HOST = os.getenv('HOST')
+    REDIS_PORT = os.getenv('REDIS_PORT')
+    REDIS_DECODE = os.getenv('DECODE_RESPONSES')
+    REDIS_USER = os.getenv('USERNAME')
+    REDIS_PASSWORD = os.getenv('PASSWORD')

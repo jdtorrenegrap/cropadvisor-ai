@@ -32,8 +32,8 @@ class ChatService:
               disable_streaming=True,
               max_tokens=None,
               timeout=None,
-              max_retries=2, 
-              api_key=os.getenv("llm")
+              max_retries=2,
+              api_key=os.getenv("LLM")
              )
 
     def chat(self, token, message):
